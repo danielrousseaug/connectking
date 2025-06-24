@@ -88,8 +88,9 @@ static int search(int d,int a,int b,int p){
     auto it = ttable.find(key);
     if(it!=ttable.end() && it->second.depth>=d) return it->second.score;
 
-    if(is_win(1)) return 1000-d;
-    if(is_win(2)) return -1000+d;
+    // prefer quicker wins for both players by scaling with depth
+    if(is_win(1)) return 1000+d;   // larger score for faster win
+    if(is_win(2)) return -1000-d;  // smaller score for faster win
     bool full=true; for(int c=0;c<7;c++) if(is_valid(c)){ full=false; break; }
     if(full||d==0) {
         int val = eval();
