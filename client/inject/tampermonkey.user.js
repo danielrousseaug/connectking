@@ -4,6 +4,8 @@
 // @version      1.1
 // @description  Sends each board to http://localhost:8000 and overlays the AI-suggested move.
 // @match        https://papergames.io/*
+// @updateURL   https://raw.githubusercontent.com/username/connectking/main/client/inject/tampermonkey.user.js
+// @downloadURL https://raw.githubusercontent.com/username/connectking/main/client/inject/tampermonkey.user.js
 // @run-at       document-idle
 // @grant        none
 // ==/UserScript==
