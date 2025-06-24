@@ -150,7 +150,7 @@ int main(){
             std::cout<<"\n=== New board ==================\n";
             for(auto& row:board){ std::cout<<'|'; for(int c:row) std::cout<<(c? (c==1?'O':'X') :'.')<<'|'; std::cout<<'\n'; }
             int cnt1=0,cnt2=0; for(auto& row:board)for(int c:row){ if(c==1) cnt1++; else if(c==2) cnt2++; }
-            int player = (cnt1+cnt2)%2 ? 2 : 1;
+            int player = cnt1<=cnt2 ? 1 : 2;
             std::cout<<"Next to play: Player "<<player<<(player==1?" (O)":" (X)")<<"\nThinking... "<<std::flush;
             int col = best_move(player);
             std::cout<<"best column = "<<col<<"\n";
@@ -171,7 +171,7 @@ int main(){
         int player;
         if(!rq.url_params.get("player") || std::string(rq.url_params.get("player"))=="auto"){ 
             int c1=0,c2=0; for(auto& r:board)for(int v:r){ if(v==1) c1++; else if(v==2) c2++; }
-            player = (c1+c2)%2 ? 2 : 1;
+            player = c1<=c2 ? 1 : 2;
         }else{
             player = std::atoi(rq.url_params.get("player"));
             if(player!=1&&player!=2) return crow::response(400,"player param must be 1,2,or auto");
