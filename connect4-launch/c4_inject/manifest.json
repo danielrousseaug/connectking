@@ -1,0 +1,16 @@
+{
+  "manifest_version": 3,
+  "name": "Connect-4 Board Forwarder",
+  "version": "1.0",
+  "description": "Posts the Connect-4 board to http://localhost:8000/board.",
+  "content_scripts": [
+    {
+      "matches": ["https://papergames.io/*connect4*"],
+      "js": ["inject.js"],
+      "run_at": "document_end"
+    }
+  ],
+  "permissions": ["http://localhost:8000/*"],
+  "host_permissions": ["http://localhost:8000/*"]
+}
+

@@ -1,0 +1,31 @@
+# Compiled files
+*.o
+*.out
+*.exe
+
+# macOS/Linux
+.DS_Store
+
+# Certificates
+*.pem
+
+# CMake
+CMakeFiles/
+CMakeCache.txt
+cmake_install.cmake
+Makefile
+
+# Crow docs/build
+connect4_server/crow/docs/
+connect4_server/crow/build/
+connect4_server/crow/tests/**/CMakeFiles/
+connect4_server/crow/tests/**/build/
+connect4_server/crow/tests/**/*.o
+
+# Binaries
+connect4_server/main
+connect4_server/main.o
+
+# Misc
+*.log
+
