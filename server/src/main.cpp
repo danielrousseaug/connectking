@@ -5,6 +5,8 @@
 #include <sstream>
 #include <iostream>
 #include <algorithm>
+#include <unordered_map>
+#include <string>
 
 /* ────── CORS middleware ────── */
 struct CORS {
@@ -22,6 +24,12 @@ struct CORS {
 static std::vector<std::vector<int>> board(6, std::vector<int>(7, 0));
 static std::mutex mtx;
 
+/* ────── search configuration ────── */
+static const int MAX_DEPTH = 7;            // search depth for best_move
+
+struct TTEntry { int depth; int score; };
+static std::unordered_map<std::string, TTEntry> ttable;
+
 /* ────── helpers ────── */
 static bool is_valid(int col) { return board[0][col] == 0; }
 static void drop(int col, int p) { for(int r=5;r>=0;--r) if(board[r][col]==0){ board[r][col]=p; break;} }
@@ -38,6 +46,16 @@ static bool is_win(int p){
     for(int r=0;r<6;r++)for(int c=0;c<7;c++)if(board[r][c]==p)
         if(four(r,c,0,1,p)||four(r,c,1,0,p)||four(r,c,1,1,p)||four(r,c,1,-1,p)) return true;
     return false;
+}
+
+static std::string board_key(int p){
+    std::string key;
+    key.reserve(43);
+    for(int r=0;r<6;r++)
+        for(int c=0;c<7;c++)
+            key.push_back('0'+board[r][c]);
+    key.push_back('0'+p);
+    return key;
 }
 
 /* very light heuristic */
@@ -64,38 +82,48 @@ static int eval(){
     return s;
 }
 
-/* minimax depth-6 α-β */
+/* minimax α-β with simple transposition table */
 static int search(int d,int a,int b,int p){
+    auto key = board_key(p);
+    auto it = ttable.find(key);
+    if(it!=ttable.end() && it->second.depth>=d) return it->second.score;
+
     if(is_win(1)) return 1000-d;
     if(is_win(2)) return -1000+d;
     bool full=true; for(int c=0;c<7;c++) if(is_valid(c)){ full=false; break; }
-    if(full||d==0) return eval();
+    if(full||d==0) {
+        int val = eval();
+        ttable[key] = {d,val};
+        return val;
+    }
 
+    int best;
     if(p==1){
-        int best=-1e9;
+        best=-1e9;
         for(int c:{3,2,4,1,5,0,6}) if(is_valid(c)){
             drop(c,1);
-            best=std::max(best,search(d-1,a,b,2));
+            best = std::max(best, search(d-1,a,b,2));
             undo(c);
-            a=std::max(a,best); if(b<=a) break;
+            a = std::max(a,best); if(a>=b) break;
         }
-        return best;
     }else{
-        int best=1e9;
+        best=1e9;
         for(int c:{3,2,4,1,5,0,6}) if(is_valid(c)){
             drop(c,2);
-            best=std::min(best,search(d-1,a,b,1));
+            best = std::min(best, search(d-1,a,b,1));
             undo(c);
-            b=std::min(b,best); if(b<=a) break;
+            b = std::min(b,best); if(a>=b) break;
         }
-        return best;
     }
+    ttable[key] = {d,best};
+    return best;
 }
 static int best_move(int p){
+    ttable.clear();
     int bestScore = (p==1? -1e9:1e9), bestCol = 3;
     for(int c:{3,2,4,1,5,0,6}) if(is_valid(c)){
         drop(c,p);
-        int s = search(5,-1e9,1e9,p==1?2:1);
+        int s = search(MAX_DEPTH,-1e9,1e9,p==1?2:1);
         undo(c);
         if((p==1 && s>bestScore)||(p==2 && s<bestScore)){ bestScore=s; bestCol=c; }
     }
