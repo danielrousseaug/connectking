@@ -16,16 +16,16 @@ cmake_install.cmake
 Makefile
 
 # Crow docs/build
-connect4_server/crow/docs/
-connect4_server/crow/build/
-connect4_server/crow/tests/**/CMakeFiles/
-connect4_server/crow/tests/**/build/
-connect4_server/crow/tests/**/*.o
+server/crow/docs/
+server/crow/build/
+server/crow/tests/**/CMakeFiles/
+server/crow/tests/**/build/
+server/crow/tests/**/*.o
 
 # Binaries
-connect4_server/main
-connect4_server/main.o
+server/connect4
+server/src/*.o
+server/build/
 
 # Misc
 *.log
-

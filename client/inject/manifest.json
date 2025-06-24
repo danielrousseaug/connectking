@@ -6,11 +6,10 @@
   "content_scripts": [
     {
       "matches": ["https://papergames.io/*connect4*"],
-      "js": ["inject.js"],
+      "js": ["tampermonkey.user.js"],
       "run_at": "document_end"
     }
   ],
   "permissions": ["http://localhost:8000/*"],
   "host_permissions": ["http://localhost:8000/*"]
 }
-
