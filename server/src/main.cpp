@@ -23,6 +23,8 @@ struct CORS {
 /* ────── shared board state ────── */
 static std::vector<std::vector<int>> board(6, std::vector<int>(7, 0));
 static std::mutex mtx;
+/* remember client-reported turn */
+static int lastClientPlayer = 0;
 
 /* ────── search configuration ────── */
 static const int MAX_DEPTH = 7;            // search depth for best_move
@@ -106,7 +108,7 @@ static int search(int d,int a,int b,int p){
             undo(c);
             a = std::max(a,best); if(a>=b) break;
         }
-    }else{
+    } else {
         best=1e9;
         for(int c:{3,2,4,1,5,0,6}) if(is_valid(c)){
             drop(c,2);
@@ -136,24 +138,33 @@ int main(){
 
     /* POST /board */
     CROW_ROUTE(app,"/board").methods("POST"_method)([](const crow::request& rq){
-        auto j=crow::json::load(rq.body);
-        if(!j||!j["board"]) return crow::response(400,"bad JSON");
+        auto j = crow::json::load(rq.body);
+        if(!j || !j["board"] || !j["player"])
+            return crow::response(400, "need board + player");
 
         {
             std::lock_guard<std::mutex> g(mtx);
-            for(int i=0;i<6;i++)for(int j2=0;j2<7;j2++) board[i][j2]=j["board"][i][j2].i();
+            for(int i=0;i<6;i++)
+                for(int j2=0;j2<7;j2++)
+                    board[i][j2] = j["board"][i][j2].i();
+            lastClientPlayer = j["player"].i();
         }
 
         /* live feed */
         {
             std::lock_guard<std::mutex> g(mtx);
-            std::cout<<"\n=== New board ==================\n";
-            for(auto& row:board){ std::cout<<'|'; for(int c:row) std::cout<<(c? (c==1?'O':'X') :'.')<<'|'; std::cout<<'\n'; }
-            int cnt1=0,cnt2=0; for(auto& row:board)for(int c:row){ if(c==1) cnt1++; else if(c==2) cnt2++; }
-            int player = cnt1<=cnt2 ? 1 : 2;
-            std::cout<<"Next to play: Player "<<player<<(player==1?" (O)":" (X)")<<"\nThinking... "<<std::flush;
+            std::cout << "\n=== New board ==================\n";
+            for(auto& row: board){
+                std::cout << '|';
+                for(int c: row) std::cout << (c ? (c==1?'O':'X') : '.') << '|';
+                std::cout << '\n';
+            }
+            int player = lastClientPlayer;
+            std::cout << "Next to play: Player " << player
+                      << (player==1 ? " (O)" : " (X)")
+                      << "\nThinking... " << std::flush;
             int col = best_move(player);
-            std::cout<<"best column = "<<col<<"\n";
+            std::cout << "best column = " << col << "\n";
         }
         return crow::response(200);
     });
@@ -162,26 +173,21 @@ int main(){
     CROW_ROUTE(app,"/show")([]{
         std::ostringstream os;
         std::lock_guard<std::mutex> g(mtx);
-        for(auto& row:board){ os<<'|'; for(int c:row) os<<(c? (c==1?'O':'X') :'.')<<'|'; os<<'\n'; }
+        for(auto& row: board){
+            os << '|';
+            for(int c: row) os << (c ? (c==1?'O':'X') : '.') << '|';
+            os << '\n';
+        }
         return crow::response(os.str());
     });
 
-    /* GET /move?player=1|2|auto */
-    CROW_ROUTE(app,"/move")([](const crow::request& rq){
-        int player;
-        if(!rq.url_params.get("player") || std::string(rq.url_params.get("player"))=="auto"){ 
-            int c1=0,c2=0; for(auto& r:board)for(int v:r){ if(v==1) c1++; else if(v==2) c2++; }
-            player = c1<=c2 ? 1 : 2;
-        }else{
-            player = std::atoi(rq.url_params.get("player"));
-            if(player!=1&&player!=2) return crow::response(400,"player param must be 1,2,or auto");
-        }
+    /* GET /move */
+    CROW_ROUTE(app,"/move")([]{
         std::lock_guard<std::mutex> g(mtx);
-        int col = best_move(player);
+        int col = best_move(lastClientPlayer);
         return crow::response(std::to_string(col));
     });
 
     app.port(8000).multithreaded().run();
     return 0;
 }
-
