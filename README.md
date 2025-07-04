@@ -6,10 +6,6 @@ It works by implementing a lightweight MiniMax AI algorithm in C++, and it expos
 
 Note* I do not condone cheating in online games, this project was made mainly for learning about Web Servers, RPC protocols, simple AI algorithms and to mess around with friends.
 
-Note: I do not condo
-### Project Status
-This project is currently in active development.
-
 
 
 ## Structure
