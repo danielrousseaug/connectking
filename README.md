@@ -45,9 +45,6 @@ Note* You must run a chrome instance that has HTTPS security turned off as it wi
 
 The script highlights the AI-suggested move on every turn.
 
-## Demo
 
 ![CLI screenshot](client/demo_images/cli-showcase.png)
-
-![Gameplay GIF](client/demo_images/connect4.gif)
 
