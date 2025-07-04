@@ -1,6 +1,6 @@
 # ConnectKing
 
-ConnectKing provides a simple C++ backend and a Tampermonkey userscript to play Connect-4 against a small AI. The script forwards the board state from [papergames.io](https://papergames.io/) to the local server which replies with the best move.
+ConnectKing provides a simple C++ backend and a Tampermonkey userscript that allows you to play Connect-4 with an AI assistant. The script forwards the board state from [papergames.io](https://papergames.io/) to the local server which replies with the best move.
 
 ## Structure
 
@@ -19,7 +19,6 @@ server/             # C++ backend
 - C++17 compiler (g++ or clang)
 - CMake and Make
 - OpenSSL development libraries
-- Bash or PowerShell to run the launch scripts
 
 ## Quick Start
 
@@ -33,6 +32,8 @@ Then install the userscript and open the game:
 1. Install the [Tampermonkey extension](https://www.tampermonkey.net/).
 2. Load [`client/inject/tampermonkey.user.js`](client/inject/tampermonkey.user.js) in Tampermonkey.
 3. Run `client/launch/launch_connect4.sh` (or the `.ps1` on Windows) to open the site with the extension loaded.
+
+Note* You must run a chrome instance that has HTTPS security turned off as it will not allow the Userscript to send packets to the server otherwise, I've provided some scripts to allow you to do that from Linux/Windows in client/launch/
 
 The script highlights the AI-suggested move on every turn.
 
